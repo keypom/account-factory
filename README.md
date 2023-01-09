@@ -1,3 +1,7 @@
+# Account Factory Contract
+
+Simplified and owner controlled version of `create_account` from Linkdrop Contract.
+
 # LinkDrop contract
 
 LinkDrop contract allows any user to create a link that their friends can use to claim tokens even if they don't have an account yet.
