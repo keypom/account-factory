@@ -2,24 +2,27 @@
 
 Simplified and owner controlled version of `create_account` from Linkdrop Contract.
 
-# LinkDrop contract
+## Quick How To / Testing
 
-LinkDrop contract allows any user to create a link that their friends can use to claim tokens even if they don't have an account yet.
-
-The way it works:
-
-Sender, that has NEAR:
-- Creates a new key pair `(pk1, privkey1)`.
-- Calls `linkdrop.send(pk1)` with attached balance of NEAR that they want to send.
-- Sends a link to any supported wallet app with `privkey1` as part of URL.
-
-Receiver, that doesn't have NEAR:
-- Receives link to the wallet with `privkey1`.
-- Wallet creates new key pair for this user (or they generate it via HSM) `(pk2, privkey2)`.
-- Enters the `new_account_id` receiver want for their new account.
-- Wallet creates a transaction to `linkdrop.create_account_and_claim(new_account_id, pk2)`.
-- Contract creates new account with `new_account_id` name and `pk2` as full access key and transfers NEAR that Sender sent.
-
-If Receiver already has account (or Sender wants to get back the money):
-- Sign tx with `privkey1` to call `linkdrop.claim()`, which transfers money to signer's account.
-
+1. Build the contract locally
+2. Login to [YOUR_ACCOUNT_FACTORY_ID] using near-cli
+```
+near login
+```
+3. Deploy the wasm `./res/account_factory.wasm`
+```
+near deploy [YOUR_ACCOUNT_FACTORY_ID] ./res/account-factory.wasm
+```
+4. This account is the `owner` which can add `approved_creators`
+5. Add an approved creator
+```
+near call [YOUR_ACCOUNT_FACTORY_ID] add_approved_creator '{"account_id":"[SOME_APPROVED_CREATOR_ACCOUNT_ID]"}'
+```
+6. Login to [SOME_APPROVED_CREATOR_ACCOUNT_ID] using near-cli
+```
+near login
+```
+7. Create an account from the approved creator account
+```
+near call [YOUR_ACCOUNT_FACTORY_ID] create_account '{"new_account_id":"foo.testnet","new_public_key":"[ed25519:SOME_PUBLIC_KEY]"}' --deposit=1
+```
