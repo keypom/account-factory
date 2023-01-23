@@ -11,12 +11,15 @@ near login
 ```
 3. Deploy the wasm `./res/account_factory.wasm`
 ```
-near deploy [YOUR_ACCOUNT_FACTORY_ID] ./res/account-factory.wasm
+near deploy [YOUR_ACCOUNT_FACTORY_ID] ./res/account_factory.wasm
+
+// init the contract
+near call [YOUR_ACCOUNT_FACTORY_ID] new --accountId=[YOUR_ACCOUNT_FACTORY_ID]
 ```
 4. This account is the `owner` which can add `approved_creators`
 5. Add an approved creator
 ```
-near call [YOUR_ACCOUNT_FACTORY_ID] add_approved_creator '{"account_id":"[SOME_APPROVED_CREATOR_ACCOUNT_ID]"}'
+near call [YOUR_ACCOUNT_FACTORY_ID] add_approved_creator '{"account_id":"[SOME_APPROVED_CREATOR_ACCOUNT_ID]"}' --accountId=[YOUR_ACCOUNT_FACTORY_ID]
 ```
 6. Login to [SOME_APPROVED_CREATOR_ACCOUNT_ID] using near-cli
 ```
@@ -24,5 +27,5 @@ near login
 ```
 7. Create an account from the approved creator account
 ```
-near call [YOUR_ACCOUNT_FACTORY_ID] create_account '{"new_account_id":"foo.testnet","new_public_key":"[ed25519:SOME_PUBLIC_KEY]"}' --deposit=1
+near call [YOUR_ACCOUNT_FACTORY_ID] create_account '{"new_account_id":"foo.testnet","new_public_key":"ed25519:BonsbmfRMRNzRwn92827kfGCwkNLjNDritF1LwrbZKn2"}' --deposit=1 --accountId=[SOME_APPROVED_CREATOR_ACCOUNT_ID]
 ```
