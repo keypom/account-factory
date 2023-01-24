@@ -118,6 +118,20 @@ impl AccountFactory {
         self.approved_creators.contains(&account_id)
     }
 
+    pub fn add_approved_funder(&mut self, account_id: AccountId) {
+        self.assert_contract_owner();
+        self.approved_funders.insert(&account_id);
+    }
+
+    pub fn remove_approved_funder(&mut self, account_id: AccountId) {
+        self.assert_contract_owner();
+        self.approved_funders.remove(&account_id);
+    }
+
+    pub fn is_approved_funder(&self, account_id: AccountId) -> bool {
+        self.approved_funders.contains(&account_id)
+    }
+
     fn assert_contract_owner(&mut self) {
         assert!(
             self.owner_id == env::predecessor_account_id(),
