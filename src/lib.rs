@@ -1,12 +1,23 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupSet};
 use near_sdk::json_types::{U128};
+use near_sdk::serde::{Serialize, Deserialize};
 use near_sdk::{
     env, ext_contract, require, near_bindgen, PanicOnDefault, AccountId, Promise, PromiseResult, Gas, PublicKey,
 };
 
 /// Gas attached to the callback from account creation.
 pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(20_000_000_000_000);
+
+/// Keypom Args struct to be sent to external contracts
+#[derive(Serialize, Deserialize, Debug, BorshDeserialize, BorshSerialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct KeypomArgs {
+    pub account_id_field: Option<String>,
+    pub drop_id_field: Option<String>,
+    pub key_id_field: Option<String>,
+    pub funder_id_field: Option<String>,
+}
 
 #[ext_contract(ext_self)]
 pub trait ExtLinkDrop {
@@ -31,6 +42,7 @@ fn is_promise_success() -> bool {
 pub struct AccountFactory {
     pub owner_id: AccountId,
     pub approved_creators: LookupSet<AccountId>,
+    pub approved_funders: LookupSet<AccountId>,
 }
 
 #[near_bindgen]
@@ -41,6 +53,7 @@ impl AccountFactory {
         Self {
             owner_id: env::predecessor_account_id(),
             approved_creators: LookupSet::new(b"c"),
+            approved_funders: LookupSet::new(b"f")
         }
     }
 
@@ -49,14 +62,17 @@ impl AccountFactory {
         &mut self,
         new_account_id: AccountId,
         new_public_key: PublicKey,
+        funder_id: AccountId,
+        keypom_args: KeypomArgs
     ) -> Promise {
-        assert!(
-            env::is_valid_account_id(new_account_id.as_bytes()),
-            "Invalid account id"
-        );
         require!(
             self.approved_creators.contains(&env::predecessor_account_id())
         );
+
+        // Ensure the incoming args are correct from Keypom
+        require!(keypom_args.funder_id_field.unwrap() == "funder_id".to_string());
+        require!(self.approved_funders.contains(&funder_id));
+
         let amount = env::attached_deposit();
         Promise::new(new_account_id)
             .create_account()
@@ -100,6 +116,20 @@ impl AccountFactory {
 
     pub fn is_approved_creator(&self, account_id: AccountId) -> bool {
         self.approved_creators.contains(&account_id)
+    }
+
+    pub fn add_approved_funder(&mut self, account_id: AccountId) {
+        self.assert_contract_owner();
+        self.approved_funders.insert(&account_id);
+    }
+
+    pub fn remove_approved_funder(&mut self, account_id: AccountId) {
+        self.assert_contract_owner();
+        self.approved_funders.remove(&account_id);
+    }
+
+    pub fn is_approved_funder(&self, account_id: AccountId) -> bool {
+        self.approved_funders.contains(&account_id)
     }
 
     fn assert_contract_owner(&mut self) {
