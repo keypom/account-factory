@@ -7,7 +7,7 @@ use near_sdk::{
 };
 
 /// Gas attached to the callback from account creation.
-pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(20_000_000_000_000);
+pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(13_000_000_000_000);
 
 /// Keypom Args struct to be sent to external contracts
 #[derive(Serialize, Deserialize, Debug, BorshDeserialize, BorshSerialize, Clone)]
